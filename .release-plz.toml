@@ -5,8 +5,5 @@ pr_draft = true
 pr_labels = ["release"]
 publish_all_features = true
 git_release_draft = true
+git_tag_name = "{{ package}}-v{{ version }}"
 git_release_name = "{{ package }}: v{{ version }}"
-
-[[package]]
-name = "atoms"
-git_tag_name = "atoms-v{{ version }}"
