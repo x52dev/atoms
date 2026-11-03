@@ -1,4 +1,4 @@
-#![expect(missing_docs)]
+#![allow(missing_docs)]
 
 use std::{error::Error as StdError, fmt, io};
 

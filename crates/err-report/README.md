@@ -4,7 +4,7 @@
 
 [![crates.io](https://img.shields.io/crates/v/err-report?label=latest)](https://crates.io/crates/err-report)
 [![Documentation](https://docs.rs/err-report/badge.svg?version=0.1.4)](https://docs.rs/err-report/0.1.4)
-![Version](https://img.shields.io/badge/rustc-1.85+-ab6000.svg)
+![Version](https://img.shields.io/badge/rustc-1.81+-ab6000.svg)
 ![MIT or Apache 2.0 licensed](https://img.shields.io/crates/l/err-report.svg)
 <br />
 [![Dependency Status](https://deps.rs/crate/err-report/0.1.4/status.svg)](https://deps.rs/crate/err-report/0.1.4)
