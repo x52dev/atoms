@@ -6,7 +6,7 @@ categories = ["value-formatting", "rust-patterns"]
 keywords = ["error", "error-report", "error-chain", "diagnostics"]
 repository.workspace = true
 license.workspace = true
-edition.workspace = true
+edition = "2021"
 rust-version = "1.81"
 
 [dependencies]

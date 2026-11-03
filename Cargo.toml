@@ -5,7 +5,6 @@ resolver = "2"
 [workspace.package]
 repository = "https://github.com/x52dev/atoms"
 license = "MIT OR Apache-2.0"
-edition = "2021"
 
 [workspace.lints.rust]
 rust_2018_idioms = { level = "deny", priority = 10 }
