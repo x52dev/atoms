@@ -41,7 +41,7 @@ jobs:
         if: matrix.version.name == 'msrv'
         id: msrv
         run: |
-          versions=$(cargo +stable metadata --no-deps --format-version=1 | jq -er '
+          versions=$(cargo +stable metadata --no-deps --format-version=1 | jq --exit-status --raw-output '
             .workspace_members as $members
             | [.packages[] | select(.id as $id | $members | index($id)) | .rust_version]
             | if length == 0 or any(. == null) then error("Each workspace crate must declare rust-version") else unique | join(",") end
