@@ -1,12 +1,11 @@
 [workspace]
 resolver = "2"
-members = ["atoms", "crates/temp"]
+members = ["crates/atoms", "crates/temp"]
 
 [workspace.package]
 repository = "https://github.com/x52dev/atoms"
 license = "MIT OR Apache-2.0"
 edition = "2024"
-rust-version = "1.90"
 
 [workspace.lints.rust]
 rust_2018_idioms = { level = "deny", priority = 10 }
