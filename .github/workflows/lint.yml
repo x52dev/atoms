@@ -1,0 +1,101 @@
+# This workflow is managed by gh actions-lock.
+
+name: Lint
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  zizmor:
+    name: GitHub Actions Security
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: read
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check GitHub Actions security
+        uses: zizmorcore/zizmor-action@v0.8.0
+        with:
+          advanced-security: false
+          annotations: true
+          inputs: .github/workflows
+
+  fmt:
+    name: Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Rust (nightly)
+        uses: actions-rust-lang/setup-rust-toolchain@v2.0.0
+        with:
+          toolchain: nightly
+          components: rustfmt
+
+      - name: Check with Rustfmt
+        run: cargo fmt --all -- --check
+
+  clippy:
+    name: Clippy
+
+    permissions:
+      contents: read
+      checks: write # to add clippy checks to PR diffs
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v2.0.0
+        with:
+          components: clippy
+
+      - name: Check with Clippy
+        if: github.event_name == 'pull_request'
+        uses: giraffate/clippy-action@v1.0.1
+        with:
+          reporter: github-pr-check
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          clippy_flags: >-
+            --workspace --all-features --tests --examples --bins --
+            -A unknown_lints -D clippy::todo -D clippy::dbg_macro
+
+      - name: Check with Clippy
+        if: github.event_name != 'pull_request'
+        run: >-
+          cargo clippy --workspace --all-features --tests --examples --bins --
+          -A unknown_lints -D clippy::todo -D clippy::dbg_macro
+
+      - name: Check workspace lint configuration
+        uses: x52dev/actions/check-workspace-lints@main
+
+  external-types:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: x52dev/actions/cargo-workspace-check-external-types@main

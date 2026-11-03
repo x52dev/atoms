@@ -1,0 +1,149 @@
+# This workflow is managed by gh actions-lock.
+
+name: CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  merge_group:
+    types: [checks_requested]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  read_msrv:
+    name: Read MSRV
+    uses: actions-rust-lang/msrv/.github/workflows/msrv.yml@v0.1.3
+
+  build_and_test:
+    needs: read_msrv
+
+    strategy:
+      fail-fast: false
+      matrix:
+        version:
+          - { name: msrv, version: "${{ needs.read_msrv.outputs.msrv }}" }
+          - { name: stable, version: stable }
+
+    name: Test / ${{ matrix.version.name }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup mold linker
+        uses: rui314/setup-mold@v1
+
+      - name: Install Rust (${{ matrix.version.name }})
+        id: rust
+        background: true
+        uses: actions-rust-lang/setup-rust-toolchain@v2.0.0
+        env:
+          LD_LIBRARY_PATH: ""
+        with:
+          toolchain: ${{ matrix.version.version }}
+          cache-key: ${{ hashFiles('flake.lock') }}
+
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@v35
+
+      - name: Enter Nix devshell
+        id: devshell
+        background: true
+        uses: nicknovitski/nix-develop@v1.2.1
+
+      - name: Wait for Rust
+        wait: rust
+
+      - name: Install just,cargo-hack,cargo-nextest,cargo-ci-cache-clean
+        uses: taiki-e/install-action@v2.88.0
+        env:
+          LD_LIBRARY_PATH: ""
+        with:
+          tool: just,cargo-hack,cargo-nextest,cargo-ci-cache-clean
+
+      - name: Wait for Nix devshell
+        wait: devshell
+
+      - name: workaround MSRV issues
+        if: matrix.version.name == 'msrv'
+        run: just downgrade-for-msrv
+
+      - name: tests
+        timeout-minutes: 60
+        run: just test-no-docs
+
+      - name: CI cache clean
+        run: cargo-ci-cache-clean
+
+  rustdoc:
+    name: Documentation Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Rust (nightly)
+        id: rust
+        background: true
+        uses: actions-rust-lang/setup-rust-toolchain@v2.0.0
+        env:
+          LD_LIBRARY_PATH: ""
+        with:
+          toolchain: nightly
+          cache-key: ${{ hashFiles('flake.lock') }}
+
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@v35
+
+      - name: Enter Nix devshell
+        id: devshell
+        background: true
+        uses: nicknovitski/nix-develop@v1.2.1
+
+      - name: Wait for Rust
+        wait: rust
+
+      - name: Install just
+        uses: taiki-e/install-action@v2.88.0
+        env:
+          LD_LIBRARY_PATH: ""
+        with:
+          tool: just
+
+      - name: Wait for Nix devshell
+        wait: devshell
+
+      - name: doc tests
+        run: just test-docs
+
+  features:
+    name: Feature Combinations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Rust (stable)
+        uses: actions-rust-lang/setup-rust-toolchain@v2.0.0
+
+      - name: Install cargo-hack
+        uses: taiki-e/install-action@v2.88.0
+        with:
+          tool: cargo-hack
+
+      - name: doc tests
+        run: |
+          cargo hack --each-feature check
+          cargo hack --each-feature check --all-targets

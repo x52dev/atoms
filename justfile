@@ -1,0 +1,117 @@
+import '.toolchain/rust.just'
+
+_list:
+    @just --list
+
+# Validate benchmark outputs without collecting timings.
+[group("benchmark")]
+bench-test:
+    cargo bench --workspace --all-features --locked -- --test
+
+# Build benchmarks for CPU and memory reporting.
+[group("benchmark")]
+bench-build:
+    cargo codspeed build --all-features --locked -m simulation -m memory
+
+# Run the benchmarks built with CodSpeed.
+[group("benchmark")]
+bench-run:
+    cargo codspeed run
+
+# Build benchmarks for local walltime measurements.
+[group("benchmark")]
+bench-build-walltime *args:
+    cargo codspeed build --locked -m walltime {{ args }}
+
+# Measure walltime and upload the results to CodSpeed.
+[group("benchmark")]
+bench-run-walltime *args:
+    codspeed run -m walltime -- cargo codspeed run -m walltime {{ args }}
+
+# Check security advisories.
+check-advisories:
+    cargo deny --log-level warn --workspace --all-features check advisories
+
+# Check project formatting.
+check: && clippy
+    just --unstable --fmt --check
+    fd --hidden --type=file -e=md -e=yml --exec-batch prettier --check
+    fd --hidden -e=toml --exec-batch taplo format --check
+    fd --hidden -e=toml --exec-batch taplo lint
+    cargo +nightly fmt -- --check
+
+# Format project.
+[group("lint")]
+fmt: update-readmes
+    just --unstable --fmt
+    nixpkgs-fmt .
+    fd --hidden --type=file -e=md -e=yml --exec-batch prettier --write
+    fd --type=file --hidden -e=toml --exec-batch taplo format
+    cargo +nightly fmt
+
+# Update READMEs from crate root documentation.
+[group("lint")]
+update-readmes:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    cargo metadata --no-deps --format-version=1 \
+        | jq -r '.packages[].name' \
+        | xargs -n 1 cargo rdme --force --workspace-project
+
+# Downgrade dev-dependencies necessary to run MSRV checks/tests.
+[private]
+downgrade-for-msrv:
+    @ echo "No downgrades currently needed for MSRV testing"
+
+# Run tests on all crates in workspace using specified (or default) toolchain.
+clippy toolchain="":
+    cargo {{ toolchain }} clippy --workspace --all-targets --all-features
+
+# Run tests on all crates in workspace using specified (or default) toolchain and watch for changes.
+clippy-watch toolchain="":
+    cargo watch -- just clippy {{ toolchain }}
+
+# Run tests on all crates in workspace using its MSRV.
+test-msrv: downgrade-for-msrv (test msrv_rustup)
+
+# Run tests on all crates in workspace using specified (or default) toolchain.
+test toolchain="": (test-no-docs toolchain) (test-docs toolchain)
+
+[private]
+test-no-docs toolchain="":
+    cargo {{ toolchain }} nextest run --no-tests pass --no-default-features
+    cargo {{ toolchain }} nextest run --no-tests pass
+    cargo {{ toolchain }} nextest run --no-tests pass --all-features
+
+# Test workspace docs.
+test-docs toolchain="": && doc
+    cargo {{ toolchain }} test --doc --workspace --all-features --no-fail-fast -- --nocapture
+
+# Run tests on all crates in workspace and produce coverage file (Codecov format).
+test-coverage-codecov toolchain="":
+    cargo {{ toolchain }} llvm-cov --workspace --all-features --codecov --output-path codecov.json
+
+# Run tests on all crates in workspace and produce coverage file (lcov format).
+test-coverage-lcov toolchain="":
+    cargo {{ toolchain }} llvm-cov --workspace --all-features --lcov --output-path lcov.info
+
+# Document crates in workspace.
+doc *args: && doc-set-workspace-crates
+    rm -f "$(cargo metadata --format-version=1 | jq -r '.target_directory')/doc/crates.js"
+    RUSTDOCFLAGS="--cfg=docsrs -Dwarnings" cargo +nightly doc --no-deps --workspace --all-features {{ args }}
+
+[private]
+doc-set-workspace-crates:
+    #!/usr/bin/env bash
+    (
+        echo "window.ALL_CRATES ="
+        cargo metadata --format-version=1 \
+        | jq '[.packages[] | select(.source == null) | .targets | map(select(.doc) | .name)] | flatten'
+        echo ";"
+    ) > "$(cargo metadata --format-version=1 | jq -r '.target_directory')/doc/crates.js"
+
+# Build rustdoc for all crates in workspace and watch for changes.
+doc-watch:
+    RUSTDOCFLAGS="--cfg=docsrs" cargo +nightly doc --no-deps --workspace --all-features --open
+    cargo watch -- RUSTDOCFLAGS="--cfg=docsrs" cargo +nightly doc --no-deps --workspace --all-features

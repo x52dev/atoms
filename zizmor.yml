@@ -1,0 +1,5 @@
+rules:
+  # actions-lock verifies pins in .github/workflows/actions.lock.
+  # External reusable workflows use exact tags until actions-lock supports them.
+  unpinned-uses:
+    disable: true

@@ -1,0 +1,29 @@
+# This workflow is managed by gh actions-lock.
+
+name: Verify action lockfile
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install actions-lock
+        run: gh extension install github/gh-actions-lock --pin v0.1.6
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Verify locked actions
+        run: gh actions-lock --verify
+        env:
+          GH_TOKEN: ${{ github.token }}
