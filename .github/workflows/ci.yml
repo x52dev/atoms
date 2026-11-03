@@ -37,6 +37,17 @@ jobs:
       - name: Setup mold linker
         uses: rui314/setup-mold@v1
 
+      - name: Read crate MSRVs
+        if: matrix.version.name == 'msrv'
+        id: msrv
+        run: |
+          versions=$(cargo +stable metadata --no-deps --format-version=1 | jq --exit-status --raw-output '
+            .workspace_members as $members
+            | [.packages[] | select(.id as $id | $members | index($id)) | .rust_version]
+            | if length == 0 or any(. == null) then error("Each workspace crate must declare rust-version") else unique | join(",") end
+          ')
+          echo "toolchains=$versions,stable" >> "$GITHUB_OUTPUT"
+
       - name: Install Rust (${{ matrix.version.name }})
         id: rust
         background: true
@@ -44,7 +55,7 @@ jobs:
         env:
           LD_LIBRARY_PATH: ""
         with:
-          toolchain: ${{ matrix.version.version }}
+          toolchain: ${{ steps.msrv.outputs.toolchains || matrix.version.version }}
           cache-key: ${{ hashFiles('flake.lock') }}
 
       - name: Install Nix
