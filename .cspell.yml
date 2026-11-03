@@ -1,0 +1,16 @@
+version: "0.2"
+words:
+  - clippy
+  - codecov
+  - docsrs
+  - msrv
+  - nextest
+  - nixpkgs
+  - pkgs
+  - robjtede
+  - rustdoc
+  - rustdocflags
+  - rustfmt
+  - rustup
+  - struct
+  - taplo
