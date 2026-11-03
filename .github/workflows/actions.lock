@@ -7,21 +7,21 @@ workflows:
         - 'actions-rust-lang/setup-rust-toolchain@v2.0.0'
         - 'actions/checkout@v7.0.1'
         - 'codspeedhq/action@v5.6.1'
-        - 'taiki-e/install-action@v2.88.0'
+        - 'taiki-e/install-action@v2.88.1'
     '.github/workflows/ci.yml':
         - 'actions-rust-lang/setup-rust-toolchain@v2.0.0'
         - 'actions/checkout@v7.0.1'
         - 'nicknovitski/nix-develop@v1.2.1'
         - 'nixbuild/nix-quick-install-action@v35'
         - 'rui314/setup-mold@v1'
-        - 'taiki-e/install-action@v2.88.0'
+        - 'taiki-e/install-action@v2.88.1'
     '.github/workflows/coverage.yml':
         - 'actions-rust-lang/setup-rust-toolchain@v2.0.0'
         - 'actions/checkout@v7.0.1'
         - 'codecov/codecov-action@v7.1.1'
         - 'nicknovitski/nix-develop@v1.2.1'
         - 'nixbuild/nix-quick-install-action@v35'
-        - 'taiki-e/install-action@v2.88.0'
+        - 'taiki-e/install-action@v2.88.1'
     '.github/workflows/lint.yml':
         - 'actions-rust-lang/setup-rust-toolchain@v2.0.0'
         - 'actions/checkout@v7.0.1'
@@ -158,9 +158,9 @@ dependencies:
         commit: 'sha1-f7e5d7c961414b23f5b25b2da9294395d08513ad'
         owner_id: 43724913
         repo_id: 442947557
-    'taiki-e/install-action@v2.88.0':
-        ref: 'v2.88.0'
-        commit: 'sha1-86f7a0ffb25f40114606501a311ebcfaf882ea32'
+    'taiki-e/install-action@v2.88.1':
+        ref: 'v2.88.1'
+        commit: 'sha1-68a389c788b2cd04016ce8c80ee23b80d2ab3d68'
         owner_id: 43724913
         repo_id: 442947557
     'x52dev/actions@main':

@@ -59,7 +59,7 @@ jobs:
         wait: rust
 
       - name: Install just,cargo-hack,cargo-nextest,cargo-ci-cache-clean
-        uses: taiki-e/install-action@v2.88.0
+        uses: taiki-e/install-action@v2.88.1
         env:
           LD_LIBRARY_PATH: ""
         with:
@@ -110,7 +110,7 @@ jobs:
         wait: rust
 
       - name: Install just
-        uses: taiki-e/install-action@v2.88.0
+        uses: taiki-e/install-action@v2.88.1
         env:
           LD_LIBRARY_PATH: ""
         with:
@@ -134,7 +134,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v2.0.0
 
       - name: Install cargo-hack
-        uses: taiki-e/install-action@v2.88.0
+        uses: taiki-e/install-action@v2.88.1
         with:
           tool: cargo-hack
 
