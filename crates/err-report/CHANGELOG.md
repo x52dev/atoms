@@ -3,6 +3,8 @@
 ## Unreleased
 
 - Minimum supported Rust version (MSRV) is now 1.81.
+- Stop formatting cyclic error chains before a source is repeated.
+- Correct the documentation for pretty output; backtrace output is not supported.
 
 ## 0.1.4
 

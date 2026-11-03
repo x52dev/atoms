@@ -39,6 +39,8 @@ use std::fmt::{self, Write as _};
 /// `Report` only requires that the wrapped error implement `Error`. It doesn't require that the
 /// wrapped error be `Send`, `Sync`, or `'static`.
 ///
+/// Source traversal stops before an error is repeated in a cyclic source chain.
+///
 /// # Examples
 ///
 /// ```rust
@@ -189,8 +191,7 @@ use std::fmt::{self, Write as _};
 /// ```
 ///
 /// **Note**: `Report`s constructed via `?` and `From` will be configured to use the single line
-/// output format. If you want to make sure your `Report`s are pretty printed and include backtrace
-/// you will need to manually convert and enable those flags.
+/// output format. For pretty output, convert with `Report::from` and call `.pretty(true)`.
 ///
 /// ```should_panic
 /// use err_report::Report;
@@ -541,6 +542,7 @@ impl<E> fmt::Display for Report<E>
 where
     E: Error,
 {
+    /// Formats the error chain in the selected single-line or pretty mode.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.pretty {
             self.fmt_multiline(f)
@@ -570,6 +572,7 @@ impl<T> fmt::Write for Indented<'_, T>
 where
     T: fmt::Write,
 {
+    /// Writes text with six spaces before each continuation line.
     fn write_str(&mut self, s: &str) -> fmt::Result {
         for (i, line) in s.split('\n').enumerate() {
             if i > 0 {
@@ -591,12 +594,14 @@ where
 #[derive(Clone, Debug)]
 struct Source<'a> {
     current: Option<&'a (dyn Error + 'static)>,
+    visited: Vec<&'a (dyn Error + 'static)>,
 }
 
 impl<'a> Source<'a> {
     fn new(error: &'a (dyn Error + 'static)) -> Self {
         Self {
             current: Some(error),
+            visited: Vec::new(),
         }
     }
 }
@@ -604,12 +609,19 @@ impl<'a> Source<'a> {
 impl<'a> Iterator for Source<'a> {
     type Item = &'a (dyn Error + 'static);
 
+    /// Returns the next source once and stops before revisiting an error.
     fn next(&mut self) -> Option<Self::Item> {
-        let current = self.current;
-        self.current = self.current.and_then(Error::source);
-        current
+        let current = self.current.take()?;
+        self.visited.push(current);
+
+        self.current = current
+            .source()
+            .filter(|next| !self.visited.iter().any(|seen| std::ptr::eq(*seen, *next)));
+
+        Some(current)
     }
 
+    /// Reports whether at least one unvisited source remains.
     fn size_hint(&self) -> (usize, Option<usize>) {
         if self.current.is_some() {
             (1, None)
