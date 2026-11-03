@@ -18,18 +18,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  read_msrv:
-    name: Read MSRV
-    uses: actions-rust-lang/msrv/.github/workflows/msrv.yml@v0.1.3
-
   build_and_test:
-    needs: read_msrv
-
     strategy:
       fail-fast: false
       matrix:
         version:
-          - { name: msrv, version: "${{ needs.read_msrv.outputs.msrv }}" }
+          - { name: msrv, version: stable }
           - { name: stable, version: stable }
 
     name: Test / ${{ matrix.version.name }}
@@ -74,11 +68,12 @@ jobs:
       - name: Wait for Nix devshell
         wait: devshell
 
-      - name: workaround MSRV issues
+      - name: MSRV tests
         if: matrix.version.name == 'msrv'
-        run: just downgrade-for-msrv
+        run: just test-msrv
 
       - name: tests
+        if: matrix.version.name == 'stable'
         timeout-minutes: 60
         run: just test-no-docs
 

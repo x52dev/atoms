@@ -72,8 +72,11 @@ clippy toolchain="":
 clippy-watch toolchain="":
     cargo watch -- just clippy {{ toolchain }}
 
-# Run tests on all crates in workspace using its MSRV.
-test-msrv: downgrade-for-msrv (test msrv_rustup)
+# Run tests on each crate using its declared MSRV.
+test-msrv: downgrade-for-msrv
+    cargo hack --workspace --rust-version test --no-default-features
+    cargo hack --workspace --rust-version test
+    cargo hack --workspace --rust-version test --all-features
 
 # Run tests on all crates in workspace using specified (or default) toolchain.
 test toolchain="": (test-no-docs toolchain) (test-docs toolchain)
