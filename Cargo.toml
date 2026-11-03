@@ -1,6 +1,6 @@
 [workspace]
-resolver = "2"
-members = ["crates/atoms", "crates/temp"]
+members = ["crates/*"]
+resolver = "3"
 
 [workspace.package]
 repository = "https://github.com/x52dev/atoms"
