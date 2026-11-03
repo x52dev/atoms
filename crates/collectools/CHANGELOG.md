@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Lower the minimum supported Rust version (MSRV) to 1.64.
+
 ## 0.1.3
 
 - No significant changes since `0.1.2`.
