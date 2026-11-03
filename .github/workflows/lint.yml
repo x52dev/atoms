@@ -18,7 +18,7 @@ concurrency:
 jobs:
   zizmor:
     name: GitHub Actions Security
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
 
     permissions:
       actions: read
@@ -38,7 +38,7 @@ jobs:
 
   fmt:
     name: Format
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7.0.1
         with:
