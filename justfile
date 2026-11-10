@@ -118,3 +118,7 @@ doc-set-workspace-crates:
 doc-watch:
     RUSTDOCFLAGS="--cfg=docsrs" cargo +nightly doc --no-deps --workspace --all-features --open
     cargo watch -- RUSTDOCFLAGS="--cfg=docsrs" cargo +nightly doc --no-deps --workspace --all-features
+
+# Link a no_std consumer without a global allocator.
+test-no-alloc toolchain="":
+    cargo {{ toolchain }} build --manifest-path crates/truncate-safe/tests/no-alloc/Cargo.toml

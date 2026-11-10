@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add `alloc` crate feature, enabled by default.
+
 ## 0.1.1
 
 - Lower the minimum supported Rust version (MSRV) to 1.85.
