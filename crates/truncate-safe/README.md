@@ -11,7 +11,14 @@
 
 Truncate strings at UTF-8 character boundaries with an optional ellipsis.
 
-This crate is `no_std` and uses `alloc` for owned results.
+This crate is `no_std`. The `alloc` feature is enabled by default and provides
+`truncate_with_ellipsis` and `truncate_with`, which can return owned results.
+Disable default features to use `truncate` without an allocator:
+
+```toml
+[dependencies]
+truncate-safe = { version = "0.1", default-features = false }
+```
 
 The limit is a byte count. If the limit is inside a UTF-8 character, truncation stops before that
 character. Limits at or above the input length leave the text unchanged.
@@ -23,9 +30,16 @@ combining accent.
 ## Examples
 
 ```rust
-use truncate_safe::{truncate, truncate_with, truncate_with_ellipsis};
+use truncate_safe::truncate;
 
 assert_eq!(truncate("Hello, 世界!", 9), "Hello, ");
+```
+
+With the `alloc` feature:
+
+```rust
+use truncate_safe::{truncate_with, truncate_with_ellipsis};
+
 assert_eq!(truncate_with_ellipsis("Hello, 世界!", 9), "Hello, …");
 assert_eq!(truncate_with_ellipsis("Hello", 5), "Hello");
 assert_eq!(truncate_with("Hello, 世界!", 9, "..."), "Hello, ...");

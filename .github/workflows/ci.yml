@@ -88,6 +88,9 @@ jobs:
         timeout-minutes: 60
         run: just test-no-docs
 
+      - name: No allocator consumer
+        run: just test-no-alloc
+
       - name: CI cache clean
         run: cargo-ci-cache-clean
 

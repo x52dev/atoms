@@ -1,6 +1,13 @@
 //! Truncate strings at UTF-8 character boundaries with an optional ellipsis.
 //!
-//! This crate is `no_std` and uses `alloc` for owned results.
+//! This crate is `no_std`. The `alloc` feature is enabled by default and provides
+//! `truncate_with_ellipsis` and `truncate_with`, which can return owned results.
+//! Disable default features to use `truncate` without an allocator:
+//!
+//! ```toml
+//! [dependencies]
+//! truncate-safe = { version = "0.1", default-features = false }
+//! ```
 //!
 //! The limit is a byte count. If the limit is inside a UTF-8 character, truncation stops before that
 //! character. Limits at or above the input length leave the text unchanged.
@@ -12,19 +19,31 @@
 //! # Examples
 //!
 //! ```rust
-//! use truncate_safe::{truncate, truncate_with, truncate_with_ellipsis};
+//! use truncate_safe::truncate;
 //!
 //! assert_eq!(truncate("Hello, 世界!", 9), "Hello, ");
+//! ```
+//!
+//! With the `alloc` feature:
+//!
+//! ```rust
+//! # #[cfg(feature = "alloc")]
+//! # {
+//! use truncate_safe::{truncate_with, truncate_with_ellipsis};
+//!
 //! assert_eq!(truncate_with_ellipsis("Hello, 世界!", 9), "Hello, …");
 //! assert_eq!(truncate_with_ellipsis("Hello", 5), "Hello");
 //! assert_eq!(truncate_with("Hello, 世界!", 9, "..."), "Hello, ...");
+//! # }
 //! ```
 
 #![no_std]
 #![forbid(unsafe_code)]
 
+#[cfg(feature = "alloc")]
 extern crate alloc;
 
+#[cfg(feature = "alloc")]
 use alloc::borrow::{Cow, ToOwned};
 
 /// Returns the longest prefix whose byte length does not exceed `max_len`.
@@ -43,6 +62,7 @@ use alloc::borrow::{Cow, ToOwned};
 /// assert_eq!(truncate("café", 5), "café");
 /// assert_eq!(truncate("café", usize::MAX), "café");
 /// ```
+#[inline]
 #[must_use]
 pub fn truncate(text: &str, max_len: usize) -> &str {
     let mut end = max_len.min(text.len());
@@ -74,6 +94,8 @@ pub fn truncate(text: &str, max_len: usize) -> &str {
 /// assert_eq!(truncate_with_ellipsis("café", 5), "café");
 /// assert_eq!(truncate_with_ellipsis("café", 0), "…");
 /// ```
+#[cfg(feature = "alloc")]
+#[inline]
 #[must_use]
 pub fn truncate_with_ellipsis(text: &str, max_len: usize) -> Cow<'_, str> {
     truncate_with(text, max_len, "…")
@@ -97,6 +119,7 @@ pub fn truncate_with_ellipsis(text: &str, max_len: usize) -> Cow<'_, str> {
 /// assert_eq!(truncate_with("café", 4, "..."), "caf...");
 /// assert_eq!(truncate_with("café", 5, "..."), "café");
 /// ```
+#[cfg(feature = "alloc")]
 #[must_use]
 pub fn truncate_with<'a>(text: &'a str, max_len: usize, ellipsis: &str) -> Cow<'a, str> {
     let prefix = truncate(text, max_len);
@@ -113,9 +136,12 @@ pub fn truncate_with<'a>(text: &'a str, max_len: usize, ellipsis: &str) -> Cow<'
 
 #[cfg(test)]
 mod tests {
+    #[cfg(feature = "alloc")]
     use alloc::borrow::{Cow, ToOwned};
 
-    use super::{truncate, truncate_with, truncate_with_ellipsis};
+    use super::truncate;
+    #[cfg(feature = "alloc")]
+    use super::{truncate_with, truncate_with_ellipsis};
 
     #[test]
     fn truncates_ascii_at_the_byte_limit() {
@@ -161,17 +187,20 @@ mod tests {
 
     #[test]
     fn returns_a_slice_of_the_input() {
-        let text = "café".to_owned();
-        let prefix = truncate(&text, 4);
+        let bytes = [b'c', b'a', b'f', 0xc3, 0xa9];
+        let text = core::str::from_utf8(&bytes).unwrap();
+        let prefix = truncate(text, 4);
 
         assert_eq!(prefix.as_ptr(), text.as_ptr());
     }
 
+    #[cfg(feature = "alloc")]
     #[test]
     fn appends_the_ellipsis_after_the_byte_limit() {
         assert_eq!(truncate_with_ellipsis("café", 4), "caf…");
     }
 
+    #[cfg(feature = "alloc")]
     #[test]
     fn appends_a_custom_ellipsis_after_the_byte_limit() {
         assert_eq!(truncate_with("café", 4, "…"), "caf…");
@@ -179,6 +208,7 @@ mod tests {
         assert_eq!(truncate_with("café", 4, " [more]"), "caf [more]");
     }
 
+    #[cfg(feature = "alloc")]
     #[test]
     fn borrows_text_when_no_ellipsis_is_needed() {
         for max_len in [5, 6, usize::MAX] {
@@ -189,6 +219,7 @@ mod tests {
         }
     }
 
+    #[cfg(feature = "alloc")]
     #[test]
     fn borrows_the_prefix_when_the_ellipsis_is_empty() {
         let result = truncate_with("café", 4, "");
@@ -197,6 +228,7 @@ mod tests {
         assert!(matches!(result, Cow::Borrowed(_)));
     }
 
+    #[cfg(feature = "alloc")]
     #[test]
     fn adds_no_ellipsis_to_empty_input() {
         for max_len in [0, 1, usize::MAX] {
@@ -204,12 +236,14 @@ mod tests {
         }
     }
 
+    #[cfg(feature = "alloc")]
     #[test]
     fn returns_only_the_ellipsis_when_no_character_fits() {
         assert_eq!(truncate_with_ellipsis("hello", 0), "…");
         assert_eq!(truncate_with_ellipsis("🦀", 3), "…");
     }
 
+    #[cfg(feature = "alloc")]
     #[test]
     fn ellipsis_does_not_need_to_outlive_the_result() {
         let result = {
