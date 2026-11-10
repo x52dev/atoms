@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Add `alloc` crate feature, enabled by default.
+- Add the `SafeTruncate` extension trait for method calls on `str` and `String`.
 
 ## 0.1.1
 

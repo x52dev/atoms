@@ -43,8 +43,12 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
+mod ext;
+
 #[cfg(feature = "alloc")]
 use alloc::borrow::{Cow, ToOwned};
+
+pub use self::ext::SafeTruncate;
 
 /// Returns the longest prefix whose byte length does not exceed `max_len`.
 ///
@@ -139,9 +143,73 @@ mod tests {
     #[cfg(feature = "alloc")]
     use alloc::borrow::{Cow, ToOwned};
 
-    use super::truncate;
+    use super::{truncate, SafeTruncate};
     #[cfg(feature = "alloc")]
     use super::{truncate_with, truncate_with_ellipsis};
+
+    #[cfg(feature = "alloc")]
+    #[test]
+    fn methods_work_on_str_and_string() {
+        let owned = "aé中🦀z".to_owned();
+
+        for limit in (0..=owned.len()).chain([usize::MAX]) {
+            assert_eq!(owned.truncate_safe(limit), truncate(&owned, limit));
+            assert_eq!(owned.as_str().truncate_safe(limit), truncate(&owned, limit));
+            assert_eq!(
+                owned.truncate_with_ellipsis(limit),
+                truncate_with_ellipsis(&owned, limit)
+            );
+            assert_eq!(
+                owned.as_str().truncate_with_ellipsis(limit),
+                truncate_with_ellipsis(&owned, limit)
+            );
+
+            for suffix in ["", "...", "…"] {
+                assert_eq!(
+                    owned.truncate_with(limit, suffix),
+                    truncate_with(&owned, limit, suffix)
+                );
+                assert_eq!(
+                    owned.as_str().truncate_with(limit, suffix),
+                    truncate_with(&owned, limit, suffix)
+                );
+            }
+        }
+
+        assert_eq!(owned, "aé中🦀z");
+    }
+
+    #[cfg(feature = "alloc")]
+    #[test]
+    fn methods_preserve_borrowed_results() {
+        let text = "café".to_owned();
+
+        assert_eq!(text.truncate_safe(4).as_ptr(), text.as_ptr());
+        assert!(matches!(
+            text.truncate_with_ellipsis(5),
+            Cow::Borrowed("café")
+        ));
+        assert!(matches!(
+            text.truncate_with(5, "..."),
+            Cow::Borrowed("café")
+        ));
+        assert!(matches!(text.truncate_with(4, ""), Cow::Borrowed("caf")));
+        assert!(matches!("".truncate_with_ellipsis(0), Cow::Borrowed("")));
+
+        let result = {
+            let suffix = "...".to_owned();
+
+            text.truncate_with(4, &suffix)
+        };
+
+        assert_eq!(result, "caf...");
+        assert!(matches!(result, Cow::Owned(_)));
+    }
+
+    #[test]
+    fn method_works_without_alloc() {
+        assert_eq!("café".truncate_safe(4), "caf");
+    }
 
     #[test]
     fn truncates_ascii_at_the_byte_limit() {
