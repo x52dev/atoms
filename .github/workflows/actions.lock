@@ -27,7 +27,7 @@ workflows:
         - 'actions/checkout@v7.0.1'
         - 'giraffate/clippy-action@v1.0.1'
         - 'x52dev/actions@main'
-        - 'zizmorcore/zizmor-action@v0.8.0'
+        - 'zizmorcore/zizmor-action@v0.8.1'
     '.github/workflows/release.yml':
         - 'actions-rust-lang/setup-rust-toolchain@v2.0.0'
         - 'actions/checkout@v7.0.1'
@@ -97,9 +97,9 @@ dependencies:
         commit: 'sha1-13b9d32482f25d29ead141b79e7e04e7900281e0'
         owner_id: 17407489
         repo_id: 560300269
-    'github/codeql-action@24c54180a607b1449ed407dd24f251e4e9147c8d':
-        ref: 'v4.38.3'
-        commit: 'sha1-24c54180a607b1449ed407dd24f251e4e9147c8d'
+    'github/codeql-action@9b3254085494b55a0f7c4c2b3d2d52cc712ce370':
+        ref: 'v4.39.1'
+        commit: 'sha1-9b3254085494b55a0f7c4c2b3d2d52cc712ce370'
         owner_id: 9919
         repo_id: 259445878
     'nicknovitski/nix-develop@v1.2.1':
@@ -171,10 +171,10 @@ dependencies:
         uses:
             - 'actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659'
             - 'taiki-e/cache-cargo-install-action@417450f3c33ee20393705369577571770643d4c7'
-    'zizmorcore/zizmor-action@v0.8.0':
-        ref: 'v0.8.0'
-        commit: 'sha1-53290badfa369cb0bf7ad16342cb62c2fa47ac7b'
+    'zizmorcore/zizmor-action@v0.8.1':
+        ref: 'v0.8.1'
+        commit: 'sha1-45d7276c9ca790aabd705e31ca99c6185c3e76dd'
         owner_id: 210636713
         repo_id: 985558803
         uses:
-            - 'github/codeql-action@24c54180a607b1449ed407dd24f251e4e9147c8d'
+            - 'github/codeql-action@9b3254085494b55a0f7c4c2b3d2d52cc712ce370'

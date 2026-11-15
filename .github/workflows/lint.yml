@@ -30,7 +30,7 @@ jobs:
           persist-credentials: false
 
       - name: Check GitHub Actions security
-        uses: zizmorcore/zizmor-action@v0.8.0
+        uses: zizmorcore/zizmor-action@v0.8.1
         with:
           advanced-security: false
           annotations: true
