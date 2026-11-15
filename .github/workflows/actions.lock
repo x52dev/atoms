@@ -33,7 +33,7 @@ workflows:
         - 'actions/checkout@v7.0.1'
         - 'nicknovitski/nix-develop@v1.2.1'
         - 'nixbuild/nix-quick-install-action@v35'
-        - 'release-plz/action@v0.5.147'
+        - 'release-plz/action@v0.5.148'
         - 'rust-lang/crates-io-auth-action@v1.0.6'
     '.github/workflows/verify-lockfile.yml':
         - 'actions/checkout@v7.0.1'
@@ -72,9 +72,9 @@ dependencies:
         commit: 'sha1-ed597411d8f924073f98dfc5c65a23a2325f34cd'
         owner_id: 44036562
         repo_id: 205262760
-    'cargo-bins/cargo-binstall@81df5c23b0dc775b009efdfc9895c5965b7a4e40':
-        ref: 'v1.26.1'
-        commit: 'sha1-81df5c23b0dc775b009efdfc9895c5965b7a4e40'
+    'cargo-bins/cargo-binstall@851112458b5f28a29e5bc14a690c3f283d9dcc6f':
+        ref: 'v1.26.2'
+        commit: 'sha1-851112458b5f28a29e5bc14a690c3f283d9dcc6f'
         owner_id: 110581826
         repo_id: 321270638
     'codecov/codecov-action@v7.1.1':
@@ -112,15 +112,15 @@ dependencies:
         commit: 'sha1-9f63be77f412a248c9d9a65a4c82cf066cdf8f0c'
         owner_id: 60610456
         repo_id: 296639338
-    'release-plz/action@v0.5.147':
-        ref: 'v0.5.147'
-        commit: 'sha1-f67a7e724bdad4a0f6875f186060a0ca2770d76c'
+    'release-plz/action@v0.5.148':
+        ref: 'v0.5.148'
+        commit: 'sha1-66b324fd6c72d05d2a08568492ecdd62bfb8a62b'
         owner_id: 188756284
         repo_id: 476470908
         uses:
-            - 'cargo-bins/cargo-binstall@81df5c23b0dc775b009efdfc9895c5965b7a4e40'
+            - 'cargo-bins/cargo-binstall@851112458b5f28a29e5bc14a690c3f283d9dcc6f'
             - 'release-plz/git-config@59144859caf016f8b817a2ac9b051578729173c4'
-            - 'taiki-e/install-action@5488ac5a951645ce95062214902ac4b6bc1a1037'
+            - 'taiki-e/install-action@1919c4a95903d2c33e4a221102edca87309fc14b'
     'release-plz/git-config@59144859caf016f8b817a2ac9b051578729173c4':
         ref: 'v0.1.2'
         commit: 'sha1-59144859caf016f8b817a2ac9b051578729173c4'
@@ -153,9 +153,9 @@ dependencies:
         repo_id: 588643148
         uses:
             - 'actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae'
-    'taiki-e/install-action@5488ac5a951645ce95062214902ac4b6bc1a1037':
-        ref: 'v2.87.32'
-        commit: 'sha1-5488ac5a951645ce95062214902ac4b6bc1a1037'
+    'taiki-e/install-action@1919c4a95903d2c33e4a221102edca87309fc14b':
+        ref: 'v2.89.0'
+        commit: 'sha1-1919c4a95903d2c33e4a221102edca87309fc14b'
         owner_id: 43724913
         repo_id: 442947557
     'taiki-e/install-action@v2.88.1':
