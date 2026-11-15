@@ -25,7 +25,7 @@ jobs:
       - name: Install Rust
         id: rust
         background: true
-        uses: actions-rust-lang/setup-rust-toolchain@v2.0.0
+        uses: actions-rust-lang/setup-rust-toolchain@v2.0.1
         env:
           LD_LIBRARY_PATH: ""
         with:
