@@ -51,7 +51,7 @@ jobs:
       - name: Install Rust (${{ matrix.version.name }})
         id: rust
         background: true
-        uses: actions-rust-lang/setup-rust-toolchain@v2.0.0
+        uses: actions-rust-lang/setup-rust-toolchain@v2.0.1
         env:
           LD_LIBRARY_PATH: ""
         with:
@@ -105,7 +105,7 @@ jobs:
       - name: Install Rust (nightly)
         id: rust
         background: true
-        uses: actions-rust-lang/setup-rust-toolchain@v2.0.0
+        uses: actions-rust-lang/setup-rust-toolchain@v2.0.1
         env:
           LD_LIBRARY_PATH: ""
         with:
@@ -145,7 +145,7 @@ jobs:
           persist-credentials: false
 
       - name: Install Rust (stable)
-        uses: actions-rust-lang/setup-rust-toolchain@v2.0.0
+        uses: actions-rust-lang/setup-rust-toolchain@v2.0.1
 
       - name: Install cargo-hack
         uses: taiki-e/install-action@v2.88.1
